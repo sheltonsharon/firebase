@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 function App() {
   const [state, setState] = useState({ name: "", value: "" });
-  const [data, setData] = useState([state]);
+  const [data, setData] = useState([]);
   let val = data.map((x) => (
     <h4 key={nanoid()}>
       Name: {x.name} && value:{x.value}

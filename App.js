@@ -7,9 +7,8 @@ function App() {
   const [state, setState] = useState({ name: "", value: "" });
   const [data, setData] = useState([]);
   let val = data.map((x) => (
-    <div className="result">
+    <div className="result" key={nanoid()}>
       <p
-        key={nanoid()}
         className="data"
         onClick={() => {
           console.log(x);

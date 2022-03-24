@@ -33,7 +33,7 @@ function App() {
     };
     fetch(`http://localhost:5000/${name}`, requestOptions)
       .then((response) => response.json())
-      .then((data) => fetching());
+      .then((data) => setData((old) => old.filter((x) => x.name !== name)));
   }
 
   function sendToBackend() {

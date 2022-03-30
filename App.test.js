@@ -74,9 +74,8 @@ test("name field becomes empty when submit button is clicked", () => {
   const { getByTestId } = render(<App />);
   const btnEl = getByTestId("btn");
   fireEvent.click(btnEl);
-  // const alertMock = jest.spyOn(window, "alert");
   const nameEl = getByTestId("name");
-  expect(nameEl.value).toBe(""); //alert will be poppin man..Check that as well
+  expect(nameEl.value).toBe(""); 
 });
 
 test("fetches data on mount and displays it on the screen", async () => {

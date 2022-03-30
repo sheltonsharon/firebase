@@ -10,17 +10,16 @@ function App() {
     <div className="result" key={nanoid()}>
       <p
         className="data"
+        data-testid="fetched_individual_data"
         onClick={() => {
-          console.log(x);
           setState({ name: x.name, value: x.value });
         }}
       >
-        Name: {x.name} && value:{x.value}
+        Name: {x.name} && value: {x.value}
       </p>
       <img
         src={logo}
         alt="bin"
-        key={nanoid()}
         className="bin"
         onClick={() => deleteData(x.name)}
       />
@@ -43,24 +42,24 @@ function App() {
       body: JSON.stringify(state),
     };
     if (state.name === "" || state.value === "") {
-      alert("One or two input fields are empty");
+      // alert("One or two input fields are empty");
       return;
     }
     fetch("http://localhost:5000/create", requestOptions)
       .then((response) => response.json())
-      .then((data) => fetching());
+      .then(async (data) => setData(await fetching()));
     setState({ name: "", value: "" });
   }
 
-  function fetching() {
-    console.log("fetching...");
-    fetch("http://localhost:5000/")
-      .then((response) => response.json())
-      .then((data) => setData(data));
+  async function fetching() {
+    const res = await fetch("http://localhost:5000/");
+    const json = await res.json();
+    return json;
   }
 
-  useEffect(() => {
-    fetching();
+  useEffect(async () => {
+    const data = await fetching();
+    setData(data);
   }, []);
 
   return (
@@ -69,6 +68,7 @@ function App() {
         Name:
         <input
           type="text"
+          data-testid="name"
           value={state.name}
           onChange={(e) => setState({ ...state, name: e.target.value })}
         />
@@ -77,13 +77,16 @@ function App() {
         value:
         <input
           type="text"
+          data-testid="value"
           value={state.value}
           onChange={(e) => setState({ ...state, value: e.target.value })}
         />
       </label>
-      <input type="submit" onClick={sendToBackend} />
+      <button onClick={sendToBackend} data-testid="btn">
+        Submit
+      </button>
       <div>
-        <h3>---Data retrieved---</h3>
+        <h3 data-testid="header">---Data retrieved---</h3>
         {val}
       </div>
     </div>
@@ -91,4 +94,3 @@ function App() {
 }
 
 export default App;
-

@@ -2,6 +2,7 @@ import "./App.css";
 import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
 import logo from "./trash.png";
+import deleteFetch from "./Functions/deleteFetch";
 
 function App() {
   const [state, setState] = useState({ name: "", value: "" });
@@ -21,30 +22,23 @@ function App() {
         src={logo}
         alt="bin"
         className="bin"
+        data-testid="trash"
         onClick={() => deleteData(x.name)}
       />
     </div>
   ));
 
-  function deleteData(name) {
-    const requestOptions = {
-      method: "DELETE",
-    };
-    fetch(`http://localhost:5000/${name}`, requestOptions)
-      .then((response) => response.json())
-      .then((data) => setData((old) => old.filter((x) => x.name !== name)));
+  async function deleteData(name) {
+    await deleteFetch(name);
+    setData((old) => old.filter((x) => x.name !== name));
   }
 
-  function sendToBackend() {
+  function createOrUpdate() {
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(state),
     };
-    if (state.name === "" || state.value === "") {
-      // alert("One or two input fields are empty");
-      return;
-    }
     fetch("http://localhost:5000/create", requestOptions)
       .then((response) => response.json())
       .then(async (data) => setData(await fetching()));
@@ -82,7 +76,16 @@ function App() {
           onChange={(e) => setState({ ...state, value: e.target.value })}
         />
       </label>
-      <button onClick={sendToBackend} data-testid="btn">
+      <button
+        onClick={() => {
+          if (state.name !== "" && state.value !== "") {
+            createOrUpdate();
+          } else {
+            alert("One or two input fields are empty");
+          }
+        }}
+        data-testid="btn"
+      >
         Submit
       </button>
       <div>

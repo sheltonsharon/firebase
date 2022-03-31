@@ -23,8 +23,6 @@ afterAll(() => {
   global.alert = unmockedAlert;
 });
 
-afterAll(cleanup);
-
 test("renders the component properly along with the heading", () => {
   const { getByTestId } = render(<App />);
   const headerEl = getByTestId("header");

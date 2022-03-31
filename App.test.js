@@ -1,18 +1,29 @@
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  act,
+  cleanup,
+} from "@testing-library/react";
 import App from "./App";
+import React from "react";
 
 const unmockedFetch = global.fetch;
-
+const unmockedAlert = global.alert;
 beforeAll(() => {
   global.fetch = () =>
     Promise.resolve({
       json: () => Promise.resolve([{ name: "Sharon", value: "10" }]),
     });
+  global.alert = jest.fn();
 });
 
 afterAll(() => {
   global.fetch = unmockedFetch;
+  global.alert = unmockedAlert;
 });
+
+afterAll(cleanup);
 
 test("renders the component properly along with the heading", () => {
   const { getByTestId } = render(<App />);
@@ -70,12 +81,39 @@ test("changing value of value field works correctly", () => {
   expect(valueEl.value).toBe("1");
 });
 
-test("name field becomes empty when submit button is clicked", () => {
+test("name field becomes empty when submit button is clicked", async () => {
   const { getByTestId } = render(<App />);
   const btnEl = getByTestId("btn");
-  fireEvent.click(btnEl);
   const nameEl = getByTestId("name");
-  expect(nameEl.value).toBe(""); 
+  const valueEl = getByTestId("value");
+  fireEvent.change(nameEl, {
+    target: {
+      value: "a",
+    },
+  });
+  fireEvent.change(valueEl, {
+    target: {
+      value: "1",
+    },
+  });
+  expect(screen.getByLabelText("Name:").value).toBe("a");
+  fireEvent.click(btnEl);
+  expect(await screen.getByLabelText("Name:").value).toBe("");
+});
+
+test("if value field is empty when clicking submit button, alert will be called", async () => {
+  const { getByTestId } = render(<App />);
+  const btnEl = getByTestId("btn");
+  const nameEl = getByTestId("name");
+  const valueEl = getByTestId("value");
+  fireEvent.change(nameEl, {
+    target: {
+      value: "a",
+    },
+  });
+  expect(screen.getByLabelText("Name:").value).toBe("a");
+  fireEvent.click(btnEl);
+  expect(global.alert).toHaveBeenCalledTimes(1);
 });
 
 test("fetches data on mount and displays it on the screen", async () => {
@@ -103,4 +141,17 @@ test("fetched data on click makes the value field to be updated with its corresp
   const fetchedEl = component.getByTestId("fetched_individual_data");
   fireEvent.click(fetchedEl);
   expect(valueEl.value).toBe("10");
+});
+
+test("deleting works perfectly", async () => {
+  let component;
+  await act(async () => {
+    component = render(<App />);
+  });
+  const trashEl = component.getByTestId("trash");
+  expect(screen.getByText("Name: Sharon && value: 10")).toBeInTheDocument();
+  fireEvent.click(trashEl);
+  expect(
+    await screen.findByText("Name: Sharon && value: 10")
+  ).not.toBeInTheDocument();
 });
